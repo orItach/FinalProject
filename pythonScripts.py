@@ -892,6 +892,49 @@ class assemble:
                                         print("error in assemble word " + word)
                                         print(e)
 
+    def mergeAndDuplicateDataSet(self, sourceDirectory, destinationDirectory):
+        for root, subFolders, files in os.walk(sourceDirectory):
+            for folder in subFolders:
+                # 26/11/17 Or: its the long path to the files
+                newSourceDirectory = os.path.join(sourceDirectory, folder)
+                newDestinationDirectory = os.path.join(destinationDirectory, folder)
+                print(newDestinationDirectory)
+                Utils().ensure_dir(newDestinationDirectory)
+                self.mergeAndDuplicateDataSet(newSourceDirectory, newDestinationDirectory)
+
+            # 26/11/17 Or: files are file in root directory
+            numberOfFiles = len(files)
+            currentFileNumber = 0
+            firstFileContent=""
+            secondFileContent=""
+            for currentFile in files:
+                if currentFile.endswith(".txt"):
+                    fileName = currentFile.split(".")[0]
+                    filePath = os.path.join(sourceDirectory, currentFile)
+                    destinationFilePath = os.path.join(destinationDirectory,currentFile)
+                    #when number of file are pair this condination are never hit
+                    if os.path.exists(filePath):
+                        if currentFileNumber % 2 == 1 and numberOfFiles == currentFileNumber:
+                            with io.open(filePath, 'r',encoding="utf-8") as content_file:
+                                firstFileContent = content_file.read()
+                            with io.open(destinationFilePath, 'w', encoding="utf-8") as detFile:
+                                detFile.write((firstFileContent+" "+ firstFileContent).strip(" "))
+                            firstFileContent=""
+                            continue
+                        if currentFileNumber % 2 == 0:
+                            with io.open(filePath, 'r',encoding="utf-8") as content_file:
+                                firstFileContent = content_file.read()
+                        else:
+                            with io.open(filePath, 'r',encoding="utf-8") as content_file:
+                                secondFileContent = content_file.read()
+                            with io.open(destinationFilePath, 'w', encoding="utf-8") as detFile:
+                                detFile.write((firstFileContent+" "+ firstFileContent+" "+secondFileContent + " " + secondFileContent).strip(" "))
+                            firstFileContent=""
+                            secondFileContenift=""
+                        currentFileNumber =currentFileNumber+1
+                    else:
+                        print("file not exsist (could be nothing) "+filePath)
+
     def mergeDataSet(self, sourceDirectory, destinationDirectory):
         for root, subFolders, files in os.walk(sourceDirectory):
             for folder in subFolders:
@@ -918,7 +961,7 @@ class assemble:
                             with io.open(filePath, 'r',encoding="utf-8") as content_file:
                                 firstFileContent = content_file.read()
                             with io.open(destinationFilePath, 'w', encoding="utf-8") as detFile:
-                                detFile.write(firstFileContent+" "+ firstFileContent)
+                                detFile.write(firstFileContent.strip(" "))
                             firstFileContent=""
                             continue
                         if currentFileNumber % 2 == 0:
@@ -928,10 +971,40 @@ class assemble:
                             with io.open(filePath, 'r',encoding="utf-8") as content_file:
                                 secondFileContent = content_file.read()
                             with io.open(destinationFilePath, 'w', encoding="utf-8") as detFile:
-                                detFile.write(firstFileContent+ firstFileContent+secondFileContent+ secondFileContent)
+                                detFile.write((firstFileContent + " " + secondFileContent).strip(" "))
                             firstFileContent=""
                             secondFileContenift=""
                         currentFileNumber =currentFileNumber+1
+                    else:
+                        print("file not exsist (could be nothing) "+filePath)
+
+    def duplicateDataSet(self, sourceDirectory, destinationDirectory):
+        for root, subFolders, files in os.walk(sourceDirectory):
+            for folder in subFolders:
+                # 26/11/17 Or: its the long path to the files
+                newSourceDirectory = os.path.join(sourceDirectory, folder)
+                newDestinationDirectory = os.path.join(destinationDirectory, folder)
+                print(newDestinationDirectory)
+                Utils().ensure_dir(newDestinationDirectory)
+                self.duplicateDataSet(newSourceDirectory, newDestinationDirectory)
+
+            # 26/11/17 Or: files are file in root directory
+            numberOfFiles = len(files)
+            currentFileNumber = 0
+            firstFileContent=""
+            secondFileContent=""
+            for currentFile in files:
+                if currentFile.endswith(".txt"):
+                    fileName = currentFile.split(".")[0]
+                    filePath = os.path.join(sourceDirectory, currentFile)
+                    destinationFilePath = os.path.join(destinationDirectory,currentFile)
+                    #when number of file are pair this condination are never hit
+                    if os.path.exists(filePath):
+                        with io.open(filePath, 'r', encoding="utf-8") as content_file:
+                            firstFileContent = content_file.read()
+                        with io.open(destinationFilePath, 'w', encoding="utf-8") as detFile:
+                            detFile.write((firstFileContent +" "+ firstFileContent.strip(" ")))
+                        firstFileContent = ""
                     else:
                         print("file not exsist (could be nothing) "+filePath)
 
@@ -981,6 +1054,7 @@ class calcResult:
                     print("max of this file is: "+ str(maxPerFile))
                     maxPerFile =-1
             print("biggest of all file is: "+str(biggest))
+
     def cosine_similarity(self,v1, v2):
         "compute cosine similarity of v1 to v2: (v1 dot v2)/{||v1||*||v2||)"
         sumxx, sumxy, sumyy = 0, 0, 0
@@ -1029,5 +1103,8 @@ class calcResult:
 #assemble().processFileAssembleSum("C:\FinalProject\\wiki_tagger_taaged_output","C:\FinalProject\\wiki_headtail_glove_200_sum_output","C:\FinalProject\\wiki_headtail_glove_200_output")
 #calcResult().findSimilarity("C:\FinalProject\\wiki_headtail_glove_200_basicAVG_output","C:\FinalProject\\wiki_glove_200_data_set","C:\FinalProject\\wiki_headtail_glove_200_basicAVG_result_output")
 #calcResult().findSimilarity("C:\FinalProject\\wiki_headtail_glove_200_sum_output","C:\FinalProject\\wiki_glove_200_data_set","C:\FinalProject\\wiki_headtail_glove_200_sum_result_output")
-#assemble().mergeDataSet("C:\FinalProject\\tests","C:\FinalProject\\tests_output")
-#Scripts().porccesFile( "C:\\FinalProject\\tests", "C:\\FinalProject\\tests_output")
+#assemble().mergeAndDuplicateDataSet("C:\FinalProject\\tests","C:\FinalProject\\tests_output")
+#Scripts().porccesFile( "C:\\FinalProject\\wiki_headtail_random_duplicate_merge_output", "C:\\FinalProject\\wiki_headtail_random_duplicate_merge_glove_200_8_output")
+#assemble().duplicateDataSet("C:\FinalProject\wiki_tagger_output","C:\FinalProject\wiki_tagger_duplicate_output")
+#assemble().mergeDataSet("C:\FinalProject\wiki_tagger_taaged_random_duplicate_output","C:\FinalProject\wiki_tagger_taaged_random_duplicate_merge_output")
+#assemble().mergeDataSet("C:\FinalProject\wiki_headtail_random_duplicate_output","C:\FinalProject\wiki_headtail_random_duplicate_merge_output")
